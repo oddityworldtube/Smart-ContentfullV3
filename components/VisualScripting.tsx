@@ -264,7 +264,7 @@ const VisualScripting: React.FC<VisualScriptingProps> = ({ initialScript, onScri
         const content = await zip.generateAsync({ type: "blob" });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(content);
-        a.download = `OUTPUT_PACKAGE_${Date.now()}.zip`;
+        a.download = `OUTPUT.zip`;
         a.click();
     };
 
