@@ -177,7 +177,7 @@ Your entire response MUST be a single, valid JSON object. Do not include any tex
 
 **JSON OUTPUT STRUCTURE:**
 You MUST return a valid JSON object with these EXACT keys:
-- "script": "The complete spoken text as a single continuous paragraph. Starts with a 3-second cognitive hook. STRICTLY FORBIDDEN to use any labels, brackets, or section headers like [Hook], [Value], or [CTA]. Just the spoken words."
+- "script": "The complete spoken text as a single continuous paragraph. Starts with a 3-second cognitive hook. Just the spoken words."
 - "title": A viral title under 50 characters in {language}.
 - "description": A short description with 5 viral hashtags.
 - "keywords": An array of 10 SEO tags for the Short.
@@ -185,6 +185,7 @@ You MUST return a valid JSON object with these EXACT keys:
 **SCRIPT REQUIREMENTS:**
 - Clean text ONLY.
 - No "Welcome" or "Hello".
+- STRICTLY FORBIDDEN to use any labels, brackets, or section headers like "Hook" or "Value" or "CTA".
 - Each sentence max 7 words.
 - Total duration under 60 seconds.
 
