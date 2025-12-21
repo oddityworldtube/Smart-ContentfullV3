@@ -357,9 +357,32 @@ const VisualScripting: React.FC<VisualScriptingProps> = ({ initialScript, onScri
                             </div>
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-gray-600 opacity-60">
-                            {isProcessing ? (<><Loader2 className="w-16 h-16 mb-4 animate-spin text-primary" /><p className="font-bold text-xl">جاري معالجة المشاهد...</p></>) : (<><BarChart3 className="w-16 h-16 mb-4" /><p className="font-bold text-xl">بانتظار بدء المحرك</p></>)}
-                        </div>
+// #========================
+// [تعديل] تحديث واجهة الانتظار لتشمل حالة الاكتمال
+<div className="flex flex-col items-center justify-center h-full text-center px-4">
+    {isProcessing ? (
+        <>
+            <Loader2 className="w-12 h-12 mb-4 animate-spin text-primary" />
+            <p className="font-bold text-xl text-gray-300">جاري معالجة المشاهد...</p>
+            <p className="text-sm text-gray-500 mt-2">قد تستغرق هذه العملية بعض الوقت حسب عدد المشاهد.</p>
+        </>
+    ) : isAllProcessed ? (
+        <>
+            <div className="w-16 h-16 mb-4 rounded-full bg-green-500/10 flex items-center justify-center border-2 border-green-500/20">
+                <Check className="w-10 h-10 text-green-400" />
+            </div>
+            <p className="font-bold text-2xl text-green-400">اكتملت المهمة بنجاح!</p>
+            <p className="text-sm text-gray-400 mt-2">جميع المشاهد جاهزة. يمكنك الآن تحميل الحزمة.</p>
+        </>
+    ) : (
+        <>
+            <BarChart3 className="w-16 h-16 mb-4 text-gray-600" />
+            <p className="font-bold text-xl text-gray-500">بانتظار بدء المحرك</p>
+            <p className="text-sm text-gray-600 mt-2">ألصق السكربت في الشريط الجانبي واضغط على "تشغيل المحرك الكامل".</p>
+        </>
+    )}
+</div>
+// #========================
                     )}
                 </div>
             </div>
