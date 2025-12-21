@@ -23,6 +23,36 @@ export const resetStopFlag = () => {
   stopRequested = false;
 };
 
+// #========================
+// [إضافة] دالة تنظيف وتحليل JSON الآمنة لمعالجة أخطاء الردود
+const cleanAndParseJSON = (text: string, defaultValue: any = {}) => {
+  try {
+    if (!text) return defaultValue;
+
+    // 1. إزالة علامات الماركداون الشائعة التي يضيفها النموذج
+    let clean = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    // 2. محاولة استخلاص كتلة JSON فقط من النص، وتجاهل أي مقدمات أو خواتم
+    const firstOpen = clean.search(/[\{\[]/); // البحث عن أول قوس لكائن أو مصفوفة
+    const lastCloseBracket = clean.lastIndexOf(']');
+    const lastCloseBrace = clean.lastIndexOf('}');
+    const lastClose = Math.max(lastCloseBracket, lastCloseBrace);
+
+    if (firstOpen !== -1 && lastClose > firstOpen) {
+       clean = clean.substring(firstOpen, lastClose + 1);
+    }
+
+    // 3. محاولة التحليل النهائية
+    return JSON.parse(clean);
+
+  } catch (e) {
+    console.warn("⚠️ JSON Parse Warning (Recovered): حدث خطأ أثناء تحليل رد النموذج ولكن تم التعامل معه بأمان.", e);
+    console.log("Faulty Text Received:", text); // طباعة النص الخاطئ للمساعدة في تصحيح الأخطاء
+    return defaultValue; // إرجاع القيمة الافتراضية لمنع انهيار التطبيق
+  }
+};
+// #========================
+
 // --- دوال مساعدة للحزم ---
 
 const getKeysInPool = (poolIndex: number, allKeys: string[]): string[] => {
@@ -152,7 +182,8 @@ export const generateFullContent = async (inputs: ContentInputs): Promise<Conten
              const res = await ai.models.generateContent({ 
                 model, contents: prompt, config: { responseMimeType: "application/json" } 
              });
-             return JSON.parse(res.text || "{}");
+             // استخدام الدالة الآمنة بدلاً من JSON.parse المباشر
+             return cleanAndParseJSON(res.text || "{}", {});
         });
     }
 
@@ -182,10 +213,8 @@ export const processScenesUnified = async (batchTexts: string[], style: string, 
         model, contents: prompt, config: { responseMimeType: "application/json" }
       });
   
-      let cleanText = response.text || "[]";
-      // تنظيف الرد تحسباً لأي كتل كود (Markdown)
-      cleanText = cleanText.replace(/```json/g, '').replace(/```/g, '').trim();
-      return JSON.parse(cleanText);
+      // استخدام الدالة الآمنة مع قيمة افتراضية مصفوفة فارغة
+      return cleanAndParseJSON(response.text || "[]", []);
     }, onLog);
 };
 
@@ -204,7 +233,8 @@ export const detectBestProfile = async (topic: string): Promise<string> => {
         const profilesJson = JSON.stringify(smartProfiles.map(p => ({ id: p.id, name: p.name })));
         const prompt = getPrompt('detect_smart_profile', { topic, profilesJson });
         const res = await ai.models.generateContent({ model, contents: prompt, config: { responseMimeType: "application/json" } });
-        return JSON.parse(res.text || "{}").id || "docu";
+        // استخدام الدالة الآمنة
+        return cleanAndParseJSON(res.text || "{}", {id: "docu"}).id || "docu";
     });
 };
 
@@ -212,7 +242,8 @@ export const generateMagicTitle = async (topic: string, language: string): Promi
     return await smartExecute('light', async ({ ai, model }) => {
         const prompt = getPrompt('generate_titles_only', { currentTitle: topic, language });
         const res = await ai.models.generateContent({ model, contents: prompt, config: { responseMimeType: "application/json" } });
-        return JSON.parse(res.text || "{}").titles?.[0]?.title || topic;
+        // استخدام الدالة الآمنة
+        return cleanAndParseJSON(res.text || "{}", {}).titles?.[0]?.title || topic;
     });
 };
 
@@ -242,7 +273,8 @@ export const generateBatchScenePrompts = async (batchTexts: string[], style: str
     const response = await ai.models.generateContent({
       model, contents: prompt, config: { responseMimeType: "application/json" }
     });
-    const results = JSON.parse(response.text || "[]");
+    // استخدام الدالة الآمنة
+    const results = cleanAndParseJSON(response.text || "[]", []);
     return results.map((p: string) => ({ prompt: p, sfx: "cinematic_ambience" }));
   }, onLog);
 };
