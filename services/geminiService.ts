@@ -1,0 +1,260 @@
+import { GoogleGenAI } from "@google/genai";
+import { AppSettings, ContentInputs, ContentOutputs } from "../types";
+import { DEFAULT_PROMPTS } from '../data/defaultPrompts';
+import { smartProfiles } from '../data/contentOptions';
+
+let currentSettings: AppSettings | null = null;
+let stopRequested = false; // متغير للتحكم في إيقاف الطوارئ
+
+const POOL_SIZE = 10; // حجم حزمة المفاتيح
+
+// --- إدارة الإعدادات والإيقاف ---
+
+export const updateServiceSettings = (settings: AppSettings) => {
+  currentSettings = settings;
+};
+
+export const stopAllOperations = () => {
+  stopRequested = true;
+  console.log("🛑 [System] Emergency stop requested by user.");
+};
+
+export const resetStopFlag = () => {
+  stopRequested = false;
+};
+
+// --- دوال مساعدة للحزم ---
+
+const getKeysInPool = (poolIndex: number, allKeys: string[]): string[] => {
+    const start = poolIndex * POOL_SIZE;
+    // التأكد من عدم تجاوز حدود المصفوفة
+    return allKeys.slice(start, start + POOL_SIZE);
+};
+
+// --- المحرك الذكي (Smart Execution Engine) ---
+
+export const smartExecute = async (
+  taskType: 'heavy' | 'light', 
+  fn: (client: { ai: GoogleGenAI, model: string }) => Promise<any>,
+  onLog?: (msg: string) => void
+): Promise<any> => {
+  // 1. فحص طلب الإيقاف
+  if (stopRequested) throw new Error("Stopped");
+  
+  // 2. التحقق من المفاتيح
+  if (!currentSettings || currentSettings.apiKeys.length === 0) {
+     // Fallback للمفتاح في البيئة (للتطوير)
+     const envKey = process.env.API_KEY || "";
+     if (!envKey) throw new Error("لا توجد مفاتيح API محفوظة.");
+     const model = taskType === 'heavy' ? 'gemini-1.5-pro' : 'gemini-2.0-flash';
+     return await fn({ ai: new GoogleGenAI({ apiKey: envKey }), model });
+  }
+
+  const allKeys = currentSettings.apiKeys;
+  const totalPools = Math.ceil(allKeys.length / POOL_SIZE);
+  let currentPoolIdx = currentSettings.activePoolIndex || 0;
+
+  // تحديد النماذج المناسبة للمهمة
+  const models = taskType === 'heavy' ? currentSettings.modelMapping.heavyTasks : currentSettings.modelMapping.lightTasks;
+
+  // 3. حلقة الحزم (Pool Loop)
+  // سنحاول عبر الحزم المتاحة بدءاً من الحزمة النشطة
+  for (let poolAttempt = 0; poolAttempt < totalPools; poolAttempt++) {
+      
+      // معادلة التدوير لضمان البدء من حيث توقفنا ثم العودة للبداية
+      const actualPoolIdx = (currentPoolIdx + poolAttempt) % totalPools;
+      const poolKeys = getKeysInPool(actualPoolIdx, allKeys);
+      
+      if (poolKeys.length === 0) continue;
+
+      if (onLog) onLog(`🛡️ استخدام الحزمة رقم ${actualPoolIdx + 1} (تحتوي على ${poolKeys.length} مفتاح)...`);
+
+      // 4. حلقة النماذج والمفاتيح داخل الحزمة
+      for (const model of models) {
+          // تدوير المفاتيح داخل الحزمة (Round Robin بسيط)
+          for (let i = 0; i < poolKeys.length; i++) {
+              if (stopRequested) throw new Error("Stopped");
+              
+              const key = poolKeys[i];
+              try {
+                  const ai = new GoogleGenAI({ apiKey: key });
+                  const result = await fn({ ai, model });
+                  
+                  // نجاح! نحفظ مؤشر الحزمة الحالية للمستقبل لعدم البدء من الصفر
+                  if (currentSettings) currentSettings.activePoolIndex = actualPoolIdx;
+                  return result;
+
+              } catch (error: any) {
+                  const msg = error.message?.toLowerCase() || "";
+                  const isRateLimit = msg.includes("429") || msg.includes("quota") || msg.includes("limit") || msg.includes("resource exhausted");
+
+                  if (isRateLimit) {
+                      if (onLog) onLog(`⚠️ مفتاح ${i+1} في الحزمة ${actualPoolIdx+1} مشغول (${model}). تجربة التالي...`);
+                      continue; // جرب المفتاح التالي في نفس الحزمة فوراً
+                  } else {
+                      // خطأ تقني آخر (مثل خطأ في الصيغة)، لا داعي لتغيير المفتاح، ارمِ الخطأ
+                      throw error; 
+                  }
+              }
+          }
+      }
+
+      // 5. التوقف الإجباري (Hard Pause)
+      // إذا وصلنا هنا، فهذا يعني أن كل مفاتيح الحزمة الحالية فشلت مع كل النماذج!
+      // لا ننتقل للحزمة التالية إلا بعد فترة تبريد لحماية الـ IP العام
+      if (poolAttempt < totalPools - 1) { // لو لسه فيه حزم تانية
+          if (onLog) onLog(`⏳ الحزمة ${actualPoolIdx + 1} استنفذت بالكامل! تبريد إجباري 30 ثانية...`);
+          await new Promise(resolve => setTimeout(resolve, 30000)); 
+      }
+  }
+
+  throw new Error("❌ فشلت جميع حزم المفاتيح في إتمام الطلب. يرجى الانتظار قليلاً والمحاولة لاحقاً.");
+};
+
+// --- دوال المساعدة ---
+
+const getPrompt = (id: string, variables: Record<string, any>): string => {
+  const tmpl = DEFAULT_PROMPTS.find(p => p.id === id);
+  if (!tmpl) return "";
+  let text = tmpl.template;
+  for (const [key, val] of Object.entries(variables)) {
+     text = text.replace(new RegExp(`{${key}}`, 'g'), String(val));
+  }
+  return text;
+};
+
+// --- الوظائف الرئيسية (Core Functions) ---
+
+// 1. مصنع النصوص (Text Factory) - استراتيجية الدمج (The Creator + The Marketer)
+export const generateFullContent = async (inputs: ContentInputs): Promise<ContentOutputs> => {
+    resetStopFlag(); // التأكد من تصفير علم الإيقاف عند بدء عملية جديدة
+    
+    // المرحلة الأولى: The Creator (توليد السكربت فقط)
+    const mainScript = await smartExecute('heavy', async ({ ai, model }) => {
+        const prompt = getPrompt('generate_full_script', {
+            title: inputs.inputValue, wordCount: inputs.wordCount, language: inputs.language,
+            tone: inputs.tone, audience: inputs.audience, format: inputs.format,
+            persona: inputs.persona, style: inputs.style, cta: inputs.cta
+        });
+        const res = await ai.models.generateContent({ model, contents: prompt });
+        return res.text || "";
+    });
+
+    if (stopRequested) throw new Error("Stopped");
+
+    // المرحلة الثانية: The Marketer (توليد كل الميتاداتا والشورتس دفعة واحدة)
+    let marketingPkg: any = {};
+    if (inputs.includeMetadata || inputs.includeShortsScript || inputs.includeTiktokDesc) {
+        marketingPkg = await smartExecute('heavy', async ({ ai, model }) => {
+             const prompt = getPrompt('generate_marketing_package', {
+                 script: mainScript, language: inputs.language
+             });
+             const res = await ai.models.generateContent({ 
+                model, contents: prompt, config: { responseMimeType: "application/json" } 
+             });
+             return JSON.parse(res.text || "{}");
+        });
+    }
+
+    // تجميع النتائج
+    return {
+        mainScript,
+        metaTitle: marketingPkg.metaTitle || inputs.inputValue,
+        metaDescription: marketingPkg.metaDescription || "",
+        metaKeywords: marketingPkg.metaKeywords || [],
+        shortsScript: marketingPkg.shortsScript || "",
+        shortsTitle: marketingPkg.shortsTitle || "",
+        shortsDescription: "", 
+        shortsKeywords: marketingPkg.shortsKeywords || [],
+        tiktokDescription: marketingPkg.tiktokDescription || ""
+    };
+};
+
+// 2. المصنع المرئي (Visual Factory) - استراتيجية الدمج (Unified Processing)
+export const processScenesUnified = async (batchTexts: string[], style: string, onLog?: (m: string) => void): Promise<{tashkeel: string, visual_prompt: string, sfx: string}[]> => {
+    return await smartExecute('light', async ({ ai, model }) => {
+      const prompt = getPrompt('process_scenes_unified', { 
+          segmentsJson: JSON.stringify(batchTexts),
+          style 
+      });
+  
+      const response = await ai.models.generateContent({
+        model, contents: prompt, config: { responseMimeType: "application/json" }
+      });
+  
+      let cleanText = response.text || "[]";
+      // تنظيف الرد تحسباً لأي كتل كود (Markdown)
+      cleanText = cleanText.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(cleanText);
+    }, onLog);
+};
+
+// --- الوظائف المساعدة والقديمة (للحفاظ على التوافق) ---
+
+export const detectLanguage = async (text: string): Promise<string> => {
+    return await smartExecute('light', async ({ ai, model }) => {
+        const prompt = getPrompt('detect_language', { text: text.substring(0, 500) });
+        const res = await ai.models.generateContent({ model, contents: prompt });
+        return res.text?.trim() || "Arabic";
+    });
+};
+
+export const detectBestProfile = async (topic: string): Promise<string> => {
+    return await smartExecute('light', async ({ ai, model }) => {
+        const profilesJson = JSON.stringify(smartProfiles.map(p => ({ id: p.id, name: p.name })));
+        const prompt = getPrompt('detect_smart_profile', { topic, profilesJson });
+        const res = await ai.models.generateContent({ model, contents: prompt, config: { responseMimeType: "application/json" } });
+        return JSON.parse(res.text || "{}").id || "docu";
+    });
+};
+
+export const generateMagicTitle = async (topic: string, language: string): Promise<string> => {
+    return await smartExecute('light', async ({ ai, model }) => {
+        const prompt = getPrompt('generate_titles_only', { currentTitle: topic, language });
+        const res = await ai.models.generateContent({ model, contents: prompt, config: { responseMimeType: "application/json" } });
+        return JSON.parse(res.text || "{}").titles?.[0]?.title || topic;
+    });
+};
+
+export const suggestArtStyle = async (text: string): Promise<string> => {
+    return await smartExecute('light', async ({ ai, model }) => {
+        const prompt = getPrompt('suggest_art_style', { text: text.substring(0, 1000) });
+        const res = await ai.models.generateContent({ model, contents: prompt });
+        return res.text?.trim() || "Cinematic, realistic, 8k";
+    });
+};
+
+// هذه الدوال تم الاحتفاظ بها للتوافق، لكن يُفضل استخدام processScenesUnified بدلاً منها
+export const addTashkeel = async (text: string, onLog?: (m: string) => void): Promise<string> => {
+  return await smartExecute('light', async ({ ai, model }) => {
+    const prompt = getPrompt('add_tashkeel', { text });
+    const response = await ai.models.generateContent({ model, contents: prompt });
+    return response.text?.trim() || text;
+  }, onLog);
+};
+
+export const generateBatchScenePrompts = async (batchTexts: string[], style: string, onLog?: (m: string) => void): Promise<{prompt: string, sfx: string}[]> => {
+  return await smartExecute('light', async ({ ai, model }) => {
+    const prompt = getPrompt('generate_batch_scene_prompts', { 
+        segmentsJson: JSON.stringify(batchTexts),
+        style 
+    });
+    const response = await ai.models.generateContent({
+      model, contents: prompt, config: { responseMimeType: "application/json" }
+    });
+    const results = JSON.parse(response.text || "[]");
+    return results.map((p: string) => ({ prompt: p, sfx: "cinematic_ambience" }));
+  }, onLog);
+};
+
+// دالة فحص الصحة القديمة (يمكن تركها أو استخدامها كأداة مساعدة)
+export const runHealthCheck = async (model: string, onProgress: (msg: string) => void): Promise<number> => {
+    // تم تعطيلها مؤقتاً لأننا نستخدم استراتيجية الحزم (Pools) التي تدير الفشل تلقائياً
+    // يمكن إعادة تفعيلها إذا أردنا فحص مسبق
+    return 0; 
+};
+
+// دالة إعادة تعيين القائمة السوداء (لم تعد مستخدمة بنفس الطريقة ولكن نحتفظ بها)
+export const resetBlacklist = () => {
+    console.log("Pools reset.");
+};
