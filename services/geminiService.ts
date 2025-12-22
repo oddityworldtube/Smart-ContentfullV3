@@ -52,7 +52,39 @@ const cleanAndParseJSON = (text: string, defaultValue: any = {}) => {
   }
 };
 // #========================
+// #========================
+// [إضافة] دالة تصحيح ذكية لضمان تطابق النص غير العربي
+const correctNonArabicTashkeel = (
+  processedSegments: any[], 
+  originalTexts: string[]
+): any[] => {
+  // تعبير نمطي بسيط للتحقق من وجود أي حرف عربي
+  const arabicRegex = /[\u0600-\u06FF]/;
 
+  // إذا لم يتطابق عدد المخرجات مع المدخلات، أعد المخرجات كما هي لتجنب الأخطاء
+  if (processedSegments.length !== originalTexts.length) {
+    console.warn("Mismatch between input and output length. Skipping correction.");
+    return processedSegments;
+  }
+
+  return processedSegments.map((segment, index) => {
+    const originalText = originalTexts[index];
+
+    // التحقق: هل النص الأصلي لا يحتوي على حروف عربية؟
+    if (originalText && !arabicRegex.test(originalText)) {
+      // إذا كان الشرط صحيحاً (النص ليس عربياً)، نفرض أن النص المشكل هو نسخة طبق الأصل من النص الأصلي
+      // هذا يحل المشكلة بشكل كامل ويمنع أي ترجمة أو تشكيل خاطئ
+      return {
+        ...segment,
+        tashkeel: originalText 
+      };
+    }
+
+    // إذا كان النص عربياً، أعده كما هو من النموذج (مع التشكيل)
+    return segment;
+  });
+};
+// #========================
 // --- دوال مساعدة للحزم ---
 
 const getKeysInPool = (poolIndex: number, allKeys: string[]): string[] => {
@@ -213,10 +245,16 @@ export const processScenesUnified = async (batchTexts: string[], style: string, 
         model, contents: prompt, config: { responseMimeType: "application/json" }
       });
   
-      // استخدام الدالة الآمنة مع قيمة افتراضية مصفوفة فارغة
-      return cleanAndParseJSON(response.text || "[]", []);
+      // الخطوة 1: تحليل الـ JSON بشكل آمن
+      const parsedResult = cleanAndParseJSON(response.text || "[]", []);
+
+      // الخطوة 2: تطبيق دالة التصحيح لضمان سلامة البيانات
+      const correctedResult = correctNonArabicTashkeel(parsedResult, batchTexts);
+
+      // الخطوة 3: إرجاع النتيجة المصححة والموثوقة
+      return correctedResult;
+
     }, onLog);
-};
 
 // --- الوظائف المساعدة والقديمة (للحفاظ على التوافق) ---
 
