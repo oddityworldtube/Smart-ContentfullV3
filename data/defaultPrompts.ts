@@ -107,7 +107,7 @@ export const DEFAULT_PROMPTS: PromptTemplate[] = [
    - **Requirement:** Must be a shocking fact, a perplexing mystery, or a thought-provoking question related to "{Title}" that immediately grabs attention. Keep the introduction concise; there is no room for elaboration.
    - **STRICT PROHIBITION:** Do NOT use "Welcome", "Hello", "In this video", or any introductory greetings. Dive straight into the heart of the topic from the very first word.
 2. **CONTENT CORE:** Use the {style} approach to deliver depth and immense value. You MUST structure the body using a clear 'Digital Structure' (Listicle Format). Organize the content into a maximum of 4 to 7 comprehensive pillars. Achieve the word count of {wordCount} by expanding the depth, storytelling, and details within these few pillars, NOT by increasing the number of list items
-3. **CONCLUSION:** End with a decisive, persuasive final paragraph that leads seamlessly into this specific Call to Action: "{cta}".
+3. **CONCLUSION:** End with a decisive, persuasive final paragraph that leads seamlessly into a Call to Action. You MUST generate this Call to Action in the target language ({language}) based on the following goal: "{cta}".
 
 **FORMATTING RULES (VOICEOVER READY):**
 1. **CLEAN TEXT ONLY:** DO NOT use Markdown bolding (**text**), hashes (#), or any symbols. The text must be clean plain text.
