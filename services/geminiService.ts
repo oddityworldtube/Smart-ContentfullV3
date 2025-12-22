@@ -255,7 +255,7 @@ export const processScenesUnified = async (batchTexts: string[], style: string, 
       return correctedResult;
 
     }, onLog);
-
+};
 // --- الوظائف المساعدة والقديمة (للحفاظ على التوافق) ---
 
 export const detectLanguage = async (text: string): Promise<string> => {
