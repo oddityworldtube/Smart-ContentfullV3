@@ -32,14 +32,14 @@ export const audiences = [
   "عامة الناس", "محبي الغموض", "طلاب العلم", "صناع المحتوى", "جيل زد (Gen Z)"
 ];
 
-// إضافة دعوات اتخاذ إجراء (CTAs) فعلية ليستخدمها البرومبت
+// تحويل CTAs إلى أهداف قابلة للترجمة بواسطة النموذج
 export const ctas = [
-  "اشترك في القناة وفعل الجرس ليصلك كل جديد",
-  "شاركنا رأيك في التعليقات، هل تتفق مع هذه التحليلات؟",
-  "سجل في نشرتنا البريدية عبر الرابط في الوصف",
-  "تابعنا على وسائل التواصل الاجتماعي لمزيد من التفاصيل",
-  "احصل على نسختك المجانية من كتابنا الإلكتروني الآن",
-  "لا تنسى الإعجاب بالفيديو إذا استفدت من المعلومة"
+  "Ask to subscribe and hit the bell icon",
+  "Ask for their opinion in the comments about the analysis",
+  "Ask them to register for the newsletter via a link in the description",
+  "Ask them to follow on social media for more details",
+  "Ask them to get a free copy of an e-book",
+  "Ask them to like the video if they found it useful"
 ];
 
 export const smartProfiles: SmartProfile[] = [
