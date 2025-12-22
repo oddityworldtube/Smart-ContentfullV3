@@ -92,10 +92,10 @@ export const DEFAULT_PROMPTS: PromptTemplate[] = [
 
 **STRICT LINGUISTIC & STYLE DIRECTIVES:**
 1. **LANGUAGE:** You MUST write the entire script in **{language}**. If the language is "Arabic", then you must adhere to using only high-level Modern Standard Arabic (الفصحى) and avoid any regional dialects completely.
-2. **NUMBERS:** You MUST convert ALL digits and numbers into written Arabic words (e.g., convert "2025" to "ألفين وخمسة وعشرين"). No digits allowed in the text.
-3. **TONE & PACING:** Maintain a {tone} tone. You MUST engineer the rhythm specifically for the attention span of {audience}. To prevent {audience} from getting bored/distracted, Maintain a rhythmic flow suitable for narration. Use short, impactful sentences, but group them into coherent paragraphs rather than isolated lines. Ensure smooth transitions between ideas to create a natural storytelling pace. STRICTLY AVOID long, run-on sentences connected by conjunctions (like "و" or "ف"); use full stops (.) frequently to create dramatic pauses that allow {audience} to process the information.
+2. **NUMBERS:** You MUST write all numbers as words in the target language ({language}). For example, if the language is Arabic, "2025" becomes "ألفين وخمسة وعشرين". If English, it becomes "two thousand twenty-five".
+3. **TONE & PACING:** Maintain a {tone} tone. You MUST engineer the rhythm specifically for the attention span of {audience}. To prevent {audience} from getting bored/distracted, Maintain a rhythmic flow suitable for narration. Use short, impactful sentences, but group them into coherent paragraphs rather than isolated lines. Ensure smooth transitions between ideas to create a natural storytelling pace.STRICTLY AVOID long, run-on sentences connected by conjunctions; use full stops (.) frequently to create dramatic pauses that allow {audience} to process the information.
 4. **Visual and Sensory Language:** Write "for the ear but draw for the eye." Use descriptive and sensory words that evoke mental images. Avoid abstract concepts; instead of saying "Technology has improved," say "This technology has made a tremendous leap at an astonishing speed." Minimize metaphors and similes; keep your style simple.
-5. **DIRECT ADDRESS:** Heavily use the second person ("You/Your" translated to "أنت/ك"). Address the viewer's specific pains, fears, and ambitions directly to build an intimate connection.
+5. **DIRECT ADDRESS:** Heavily use the second person (e.g., "you", "your") appropriate for the target language ({language}). Address the viewer's specific pains, fears, and ambitions directly to build an intimate connection.
 
 **WORD COUNT ADHERENCE (STRICT REQUIREMENT):**
 - **Target Length:** Exactly {wordCount} words. 
