@@ -91,7 +91,7 @@ export const DEFAULT_PROMPTS: PromptTemplate[] = [
 **TASK:** Create a high-retention, value-packed {format} about: "{title}".
 
 **STRICT LINGUISTIC & STYLE DIRECTIVES:**
-1. **LANGUAGE:** If the language is "{language}" and it is "Arabic", you MUST use only high-level Modern Standard Arabic (الفصحى). Avoid any regional dialects or "White Ammiya" completely.
+1. **LANGUAGE:** You MUST write the entire script in **{language}**. If the language is "Arabic", then you must adhere to using only high-level Modern Standard Arabic (الفصحى) and avoid any regional dialects completely.
 2. **NUMBERS:** You MUST convert ALL digits and numbers into written Arabic words (e.g., convert "2025" to "ألفين وخمسة وعشرين"). No digits allowed in the text.
 3. **TONE & PACING:** Maintain a {tone} tone. You MUST engineer the rhythm specifically for the attention span of {audience}. To prevent {audience} from getting bored/distracted, Maintain a rhythmic flow suitable for narration. Use short, impactful sentences, but group them into coherent paragraphs rather than isolated lines. Ensure smooth transitions between ideas to create a natural storytelling pace. STRICTLY AVOID long, run-on sentences connected by conjunctions (like "و" or "ف"); use full stops (.) frequently to create dramatic pauses that allow {audience} to process the information.
 4. **Visual and Sensory Language:** Write "for the ear but draw for the eye." Use descriptive and sensory words that evoke mental images. Avoid abstract concepts; instead of saying "Technology has improved," say "This technology has made a tremendous leap at an astonishing speed." Minimize metaphors and similes; keep your style simple.
