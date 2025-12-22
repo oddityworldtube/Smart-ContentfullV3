@@ -114,9 +114,9 @@ const VisualScripting: React.FC<VisualScriptingProps> = ({ initialScript, onScri
         const newSegments: Segment[] = [];
         let currentChunk: string[] = [];
         
-        const LONG_SENTENCE_THRESHOLD = 150; 
-        const MAX_SCENE_LENGTH = 220;        
-        const MAX_SENTENCES_PER_SCENE = 4;   
+        const LONG_SENTENCE_THRESHOLD = 140; 
+        const MAX_SCENE_LENGTH = 180;        
+        const MAX_SENTENCES_PER_SCENE = 3;   
 
         const createAndPushSegment = (text: string) => {
             if (text.trim().length === 0) return;
