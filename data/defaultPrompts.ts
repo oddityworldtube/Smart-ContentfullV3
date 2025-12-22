@@ -346,7 +346,7 @@ Return a SINGLE JSON object with these EXACT keys:
 {segmentsJson}
 
 **Requirements:**
-1. **Tashkeel:** Add full Arabic diacritics (Harakat) to the "text" ensuring grammatical correctness.
+1. **Tashkeel:** Analyze the language of each segment's text. **If the text is Arabic**, add full Arabic diacritics (Harakat) to it. **If the text is NOT Arabic**, you MUST return the original, untranslated text in the "tashkeel" field without any changes.
 2. **Visual Prompt:** Write a detailed English image generation prompt for the scene. Append ", no text, 8k, {style}".
 3. **SFX:** Suggest a one-word sound effect keyword (e.g., "wind", "click", "crowd").
 
