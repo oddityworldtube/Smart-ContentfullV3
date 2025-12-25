@@ -324,6 +324,7 @@ Return a SINGLE JSON object with these EXACT keys:
   "metaKeywords": ["tag1", "tag2"],
   "shortsTitle": "Shorts Title",
   "shortsScript": "Shorts Script...",
+  "shortsDescription": "Write the shorts description here...",  <-- تمت الإضافة هنا
   "shortsKeywords": ["tag1"],
   "tiktokDescription": "TikTok Description..."
 }
