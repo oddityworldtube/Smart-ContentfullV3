@@ -80,7 +80,7 @@ export const DEFAULT_PROMPTS: PromptTemplate[] = [
 }
 `
     },
-    {
+{
         id: "generate_full_script",
         name: "توليد سكربت فيديو كامل (Content Master)",
         description: "صياغة نص احترافي يبدأ بهوك خاطف وقوي بدلاً من المقدمات التقليدية.",
@@ -106,8 +106,23 @@ export const DEFAULT_PROMPTS: PromptTemplate[] = [
    - **Constraint:** Maximum 2 to 3 short sentences.
    - **Requirement:** Must be a shocking fact, a perplexing mystery, or a thought-provoking question related to "{Title}" that immediately grabs attention. Keep the introduction concise; there is no room for elaboration.
    - **STRICT PROHIBITION:** Do NOT use "Welcome", "Hello", "In this video", or any introductory greetings. Dive straight into the heart of the topic from the very first word.
-2. **CONTENT CORE:** Use the {style} approach to deliver depth and immense value. You MUST structure the body using a clear 'Digital Structure' (Listicle Format). Organize the content into a maximum of 4 to 7 comprehensive pillars. Achieve the word count of {wordCount} by expanding the depth, storytelling, and details within these few pillars, NOT by increasing the number of list items
-3. **CONCLUSION:** End with a decisive, persuasive final paragraph that leads seamlessly into a Call to Action. You MUST generate this Call to Action in the target language ({language}) based on the following goal: "{cta}".
+2. **CONTENT CORE:** Structure the body strictly according to the active {style}:
+   - **CASE A: LISTS & STEPS** (For styles: "قائمة (Top 10)", "تعليمي (How-to)", "تبسيط العلوم"):
+     *   Structure: Organize content into 4-7 distinct, numbered pillars or steps.
+     *   Focus: Clarity, rapid value delivery, and actionable advice.
+   - **CASE B: NARRATIVE & STORY** (For styles: "سردي قصصي", "وثائقي", "تحقيق جنائي", "سرد سينمائي", "ملحمي"):
+     *   Structure: Use a fluid narrative arc (Inciting Incident -> Rising Action -> Climax -> Resolution).
+     *   Focus: Immersion, suspense, and emotional connection. STRICTLY FORBIDDEN to use "Step 1" or numbered lists here.
+   - **CASE C: DEEP ANALYSIS** (For styles: "تحليلي", "نفسي عميق", "نقاشي"):
+     *   Structure: Thematic layers. Peel back the layers of the topic one by one (Concept -> Evidence -> Dark Implication).
+     *   Focus: Psychological triggers, hidden truths, and answering "Why" rather than just "What".
+   - **GENERAL RULE:** Whichever structure you use, you MUST achieve the {wordCount} by adding depth, specific real-world examples, and sensory details, NOT by repetition.
+3. **CONCLUSION & INTEGRATED ACTION (CRITICAL):**
+   - End with a decisive, persuasive final paragraph.
+   - **MANDATORY INTEGRATION:** You MUST weave a request for the audience to **Subscribe**, **Turn on Notifications**, and **Leave a Comment** into this final paragraph.
+   - **ANTI-ROBOT RULE:** You are STRICTLY FORBIDDEN from using cliché phrases like "Don't forget to subscribe," "Smash the like button," or separate lines like "Conclusion: Subscribe now."
+   - **THE METHOD:** Connect the action to the *benefit* or the *persona* (e.g., "To ensure you don't miss the next truth, join us...").
+   - **Contextual Directive:** "{cta}"
 
 **FORMATTING RULES (VOICEOVER READY):**
 1. **CLEAN TEXT ONLY:** DO NOT use Markdown bolding (**text**), hashes (#), or any symbols. The text must be clean plain text.
@@ -313,7 +328,9 @@ You MUST return a valid JSON object with these EXACT keys:
 
 **REQUIREMENTS:**
 1. **YouTube Meta:** Viral Title, Description (with timestamps & hashtags), SEO Tags.
-2. **Shorts Script:** Extract the most interesting fact into a 60s script (Hook -> Value -> CTA) STRICTLY FORBIDDEN to use any labels, brackets, or section headers like [Hook], [Value], or [CTA]. Just the spoken words.
+2. **Shorts Content:** 
+   - Extract the most interesting fact into a 60s script (Hook -> Value -> CTA).
+   - Write a compelling description for the Short (2-3 sentences max) with hashtags.
 3. **TikTok:** A punchy description with hashtags.
 
 **OUTPUT FORMAT:**
@@ -324,7 +341,7 @@ Return a SINGLE JSON object with these EXACT keys:
   "metaKeywords": ["tag1", "tag2"],
   "shortsTitle": "Shorts Title",
   "shortsScript": "Shorts Script...",
-  "shortsDescription": "Write the shorts description here...",  <-- تمت الإضافة هنا
+  "shortsDescription": "Shorts Description...",
   "shortsKeywords": ["tag1"],
   "tiktokDescription": "TikTok Description..."
 }
