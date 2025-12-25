@@ -227,7 +227,7 @@ export const generateFullContent = async (inputs: ContentInputs): Promise<Conten
         metaKeywords: marketingPkg.metaKeywords || [],
         shortsScript: marketingPkg.shortsScript || "",
         shortsTitle: marketingPkg.shortsTitle || "",
-        shortsDescription: "", 
+        shortsDescription: marketingPkg.shortsDescription || "", 
         shortsKeywords: marketingPkg.shortsKeywords || [],
         tiktokDescription: marketingPkg.tiktokDescription || ""
     };
