@@ -328,9 +328,7 @@ You MUST return a valid JSON object with these EXACT keys:
 
 **REQUIREMENTS:**
 1. **YouTube Meta:** Viral Title, Description (with timestamps & hashtags), SEO Tags.
-2. **Shorts Content:** 
-   - Extract the most interesting fact into a 60s script (Hook -> Value -> CTA).
-   - Write a compelling description for the Short (2-3 sentences max) with hashtags.
+2. **Shorts Script:** Extract the most interesting fact into a 60s script (Hook -> Value -> CTA) STRICTLY FORBIDDEN to use any labels, brackets, or section headers like [Hook], [Value], or [CTA]. Just the spoken words.
 3. **TikTok:** A punchy description with hashtags.
 
 **OUTPUT FORMAT:**
