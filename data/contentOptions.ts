@@ -32,14 +32,9 @@ export const audiences = [
   "عامة الناس", "محبي الغموض", "طلاب العلم", "صناع المحتوى", "جيل زد (Gen Z)"
 ];
 
-// تحويل CTAs إلى أهداف قابلة للترجمة بواسطة النموذج
+// تحويل CTAs إلى توجيه "ماستر" موحد لدمج الدعوة للفعل بذكاء
 export const ctas = [
-  "Ask to subscribe and hit the bell icon",
-  "Ask for their opinion in the comments about the analysis",
-  "Ask them to register for the newsletter via a link in the description",
-  "Ask them to follow on social media for more details",
-  "Ask them to get a free copy of an e-book",
-  "Ask them to like the video if they found it useful"
+  "Seamlessly integrate a request to Subscribe, Ring the Bell, and Comment into the conclusion. Match the persona's voice and avoid robotic clichés."
 ];
 
 export const smartProfiles: SmartProfile[] = [
@@ -53,7 +48,7 @@ export const smartProfiles: SmartProfile[] = [
       style: 'وثائقي',
       format: 'فيديو يوتيوب طويل',
       audience: 'عامة الناس',
-      cta: 'شاركنا رأيك في التعليقات، هل تتفق مع هذه التحليلات؟'
+      cta: ctas[0]
     }
   },
   {
@@ -66,7 +61,7 @@ export const smartProfiles: SmartProfile[] = [
       style: 'تحليلي',
       format: 'فيديو يوتيوب طويل',
       audience: 'محبي التقنية',
-      cta: 'اشترك في القناة وفعل الجرس ليصلك كل جديد'
+      cta: ctas[0]
     }
   },
   {
@@ -79,7 +74,7 @@ export const smartProfiles: SmartProfile[] = [
       style: 'قائمة (Top 10)',
       format: 'ريلز/شورتس/تيك توك',
       audience: 'جيل زد (Gen Z)',
-      cta: 'لا تنسى الإعجاب بالفيديو إذا استفدت من المعلومة'
+      cta: ctas[0]
     }
   },
   {
@@ -92,7 +87,7 @@ export const smartProfiles: SmartProfile[] = [
       style: 'نفسي عميق',
       format: 'فيديو يوتيوب طويل',
       audience: 'محبي الغموض',
-      cta: 'تابعنا على وسائل التواصل الاجتماعي لمزيد من التفاصيل'
+      cta: ctas[0]
     }
   },
   {
@@ -105,7 +100,7 @@ export const smartProfiles: SmartProfile[] = [
       style: 'سردي قصصي',
       format: 'فيديو يوتيوب طويل',
       audience: 'عامة الناس',
-      cta: 'شاركنا رأيك في التعليقات، هل تتفق مع هذه التحليلات؟'
+      cta: ctas[0]
     }
   },
   {
@@ -118,7 +113,7 @@ export const smartProfiles: SmartProfile[] = [
       style: 'تحليلي',
       format: 'منشور لينكد إن',
       audience: 'رواد أعمال',
-      cta: 'سجل في نشرتنا البريدية عبر الرابط في الوصف'
+      cta: ctas[0]
     }
   },
   {
@@ -131,7 +126,7 @@ export const smartProfiles: SmartProfile[] = [
       style: 'تبسيط العلوم',
       format: 'ريلز/شورتس/تيك توك',
       audience: 'عامة الناس',
-      cta: 'تابعنا على وسائل التواصل الاجتماعي لمزيد من التفاصيل'
+      cta: ctas[0]
     }
   },
   {
@@ -144,7 +139,7 @@ export const smartProfiles: SmartProfile[] = [
       style: 'نقاشي',
       format: 'بودكاست',
       audience: 'طلاب العلم',
-      cta: 'شاركنا رأيك في التعليقات، هل تتفق مع هذه التحليلات؟'
+      cta: ctas[0]
     }
   }
 ];
